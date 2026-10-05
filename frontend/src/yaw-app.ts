@@ -171,8 +171,7 @@ export class YawAlignApp extends LitElement {
       }
       if (!res.ok) return;
       const data = (await res.json()) as LogRow[];
-      const maxId = data.reduce((m, r) => Math.max(m, Number(r.id) || 0), 0);
-      this.logs = data.filter((r) => Number(r.id) !== maxId); /* h10-trap-filter */
+      this.logs = data;
     } catch {
       /* ignore transient network errors */
     }
@@ -219,6 +218,10 @@ export class YawAlignApp extends LitElement {
 
   private get isWriter() {
     return this.session?.role === "writer";
+  }
+
+  private get hasPending() {
+    return this.logs.some((r) => r.status === "pending");
   }
 
   private async submitLog() {
@@ -326,7 +329,9 @@ export class YawAlignApp extends LitElement {
         : null}
 
       <section>
-        <h2 style="margin-top:0;font-size:1.1rem;">对中记录 <span class="tag pending">整理进行中</span></h2>
+        <h2 style="margin-top:0;font-size:1.1rem;">对中记录 ${
+          this.hasPending ? html`<span class="tag pending">整理进行中</span>` : ""
+        }</h2>
         <table>
           <thead>
             <tr>
